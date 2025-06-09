@@ -1,36 +1,14 @@
 import streamlit as st
-import pickle
-import sklearn
- 
-st.subheader("Predict condition or drug name")
-
-with st.sidebar:
-  models = st.radio(
-      "Select the model",
-      ["Multinomial Naive Bayes", "Logistic Regression", "Support Vector Machine", "BERT"],
-      captions=[
-          "Accuracy: 70%",
-          "Accuracy: 76%",
-          "Accuracy: 80%",
-          "Accuracy: 89%"
-      ],
-  )
-
-  target = st.radio(
-     "What do you want to predict?",
-     ["Condition", "Drug Name"],
-     captions=[
-        "Condition likely being described",
-        "Drug likely to be used"
-        ]
-     )
 
 
-if prompt := st.chat_input("Describe your condition"):
-    with st.chat_message("user"):
-        st.markdown(prompt)
+pg = st.navigation([
+  st.Page("chat.py", title="💬 Chat"),
+  st.Page("naive_bayes.py", title="Multinomial Naive Bayes"),
+  st.Page("logistic_regression.py", title="Logistic Regression"),
+  st.Page("svm.py", title="Support Vector Machine"),
+  st.Page("bert.py", title="BERT"),
+  ],
+  expanded=False
+)
 
-    with st.chat_message("assistant"):
-        model = pickle.load(open("models/log_reg.pkl", "rb"))
-        response = model.predict([prompt])[0]
-        st.markdown(response)
+pg.run()
