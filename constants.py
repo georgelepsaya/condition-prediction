@@ -49,10 +49,10 @@ metrics = {
             "macro_avg_f1": 97.2
         },
         "drug_name": {
-            "accuracy": 61.8,
-            "macro_avg_precision": 58.1,
-            "macro_avg_recall": 58.4,
-            "macro_avg_f1": 57.7
+            "accuracy": 53.22,
+            "macro_avg_precision": 53.3,
+            "macro_avg_recall": 49.2,
+            "macro_avg_f1": 47.65
         }
     }
 }

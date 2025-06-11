@@ -1,5 +1,6 @@
 import streamlit as st
 import joblib
+import fasttext
 from constants import metrics
 
 model_pages = {
@@ -34,12 +35,34 @@ with st.sidebar:
 st.subheader(f"Predict {target.lower()}")
   
 if prompt := st.chat_input("Describe your condition"):
+    
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        model = joblib.load(open("models/condition/logreg.pkl", "rb"))
+        if model_name == "Multinomial Naive Bayes":
+            if target == "Condition":
+                model = joblib.load(open("models/condition/mnb_condition.pkl", "rb"))
+            else:
+                model = joblib.load(open("models/drug/mnb_drug.pkl", "rb"))
+        elif model_name == "Logistic Regression":
+            if target == "Condition":
+                model = joblib.load(open("models/condition/lr_condition.pkl", "rb"))
+            else:
+                model = joblib.load(open("models/drug/lr_drug.pkl", "rb"))
+        elif model_name == "Support Vector Machine":
+            if target == "Condition":
+                model = joblib.load(open("models/condition/svm_condition.pkl", "rb"))
+            else:
+                model = joblib.load(open("models/drug/svm_drug.pkl", "rb"))
+        else:
+            if target == "Condition":
+                model = fasttext.load_model("models/condition/ft_condition.ftz")
+            else:
+                model = fasttext.load_model("models/drug/ft_drug.ftz")
+
         response = model.predict([prompt])[0]
+        
         st.markdown(f"Condition likely being described is **{response}**.")
         st.markdown(f"Prediction made with {model_name}.")
         st.link_button(label=f"View {model_name} report", url=selected_page, icon="📊", type="secondary")
