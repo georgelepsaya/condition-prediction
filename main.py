@@ -7,7 +7,7 @@ pg = st.navigation({
     st.Page("reports/naive_bayes.py", title="Multinomial Naive Bayes"),
     st.Page("reports/logistic_regression.py", title="Logistic Regression"),
     st.Page("reports/svm.py", title="Support Vector Machine"),
-    st.Page("reports/bert.py", title="BERT")
+    st.Page("reports/fasttext.py", title="FastText")
     ]
   },
   expanded=False

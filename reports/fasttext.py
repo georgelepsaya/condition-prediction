@@ -1,11 +1,10 @@
 import streamlit as st
-
 from constants import metrics
 
-st.title("Support Vector Machine")
+st.title("FastText")
 
-cond = metrics["svm"]["condition"]
-drug = metrics["svm"]["drug_name"]
+cond = metrics["fasttext"]["condition"]
+drug = metrics["fasttext"]["drug_name"]
 
 st.subheader("Condition")
 cond_1, cond_2, cond_3, cond_4 = st.columns(4, border=True)
