@@ -63,6 +63,7 @@ if prompt := st.chat_input("Describe your condition"):
 
         response = model.predict([prompt])[0]
         
-        st.markdown(f"Condition likely being described is **{response}**.")
-        st.markdown(f"Prediction made with {model_name}.")
-        st.link_button(label=f"View {model_name} report", url=selected_page, icon="📊", type="secondary")
+        if target == "Condition":
+            st.markdown(f"Condition likely being described is **{response}**.")
+            st.markdown(f"Prediction made with {model_name}.")
+            st.link_button(label=f"View {model_name} report", url=selected_page, icon="📊", type="secondary")

@@ -43,10 +43,10 @@ metrics = {
     },
     "fasttext": {
         "condition": {
-            "accuracy": 96.8,
-            "macro_avg_precision": 97.5,
-            "macro_avg_recall": 97,
-            "macro_avg_f1": 97.2
+            "accuracy": 94.1,
+            "macro_avg_precision": 95.1,
+            "macro_avg_recall": 94,
+            "macro_avg_f1": 94.5
         },
         "drug_name": {
             "accuracy": 53.22,
