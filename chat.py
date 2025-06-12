@@ -5,38 +5,31 @@ from constants import metrics
 import numpy as np
 import pandas as pd
 
-def _softmax(x):
-    x = np.asarray(x, dtype=float)
-    x -= x.max()
-    exp_x = np.exp(x)
-    return exp_x / exp_x.sum()
+def _softmax(x: np.ndarray):
+    x = x.astype(float) - np.max(x)
+    e = np.exp(x)
+    return e / e.sum()
 
 def get_top_n_predictions(model, text, n=3):
-    if hasattr(model, "steps"):
-        clf = model.steps[-1][1]
-    else:
-        clf = model
+    if "fasttext" in type(model).__module__:
+        labels, probs = model.predict(text, k=n)
+        clean_labels = [lbl.replace("__label__", "") for lbl in labels]
+        return list(zip(clean_labels, map(float, probs)))
+
+    final_est = model.steps[-1][1] if hasattr(model, "steps") else model
+    classes   = final_est.classes_
 
     if hasattr(model, "predict_proba"):
         probs = model.predict_proba([text])[0]
     elif hasattr(model, "decision_function"):
-        scores = model.decision_function([text])[0]
-        if np.ndim(scores) == 0:
-            scores = np.array([-scores, scores])
-
-        probs = _softmax(scores)
+        margins = model.decision_function([text])[0]
+        margins = np.array([-margins, margins]) if np.ndim(margins) == 0 else margins
+        probs = _softmax(margins)
     else:
-        raise AttributeError(
-            "The supplied model exposes neither predict_proba "
-            "nor decision_function."
-        )
+        raise AttributeError("Model exposes neither predict_proba nor decision_function")
 
-    classes = getattr(clf, "classes_", None)
-    if classes is None:
-        raise AttributeError("Estimator lacks a classes_ attribute.")
-
-    top_idx = np.argsort(probs)[::-1][:n]
-    return [(str(classes[i]), float(probs[i])) for i in top_idx]
+    top = np.argsort(probs)[::-1][:n]
+    return [(str(classes[i]), float(probs[i])) for i in top]
 
 
 model_pages = {
@@ -100,36 +93,28 @@ if prompt := st.chat_input("Describe your condition"):
         response = model.predict([prompt])[0]
         
         if target == "Condition":
-            if model_name in ("Multinomial Naive Bayes", "Logistic Regression", "Support Vector Machine"):
-                st.markdown(f"**My predictions made with {model_name}:**")
-                top_pred = get_top_n_predictions(model, prompt)
-                df = pd.DataFrame(top_pred, columns=["Condition", "Probability"])
-                df["Probability"] = df["Probability"]*100
-                st.dataframe(df,
-                             hide_index=True,
-                             column_config={
-                                    "Probability": st.column_config.NumberColumn(
-                                        "Probability",
-                                        format="%.2f%%"
-                                    )
-                                }
-                             )  
-                st.markdown(f"Condition most likely being described is **{response}**.")
-                st.link_button(label=f"View {model_name} report", url=selected_page, icon="📊", type="secondary")
+            st.markdown(f"**My predictions made with {model_name}:**")
+            top_pred = get_top_n_predictions(model, prompt)
+            df = pd.DataFrame(top_pred, columns=["Condition", "Probability"])
+            df["Probability"] = df["Probability"]*100
+            st.dataframe(df,
+                hide_index=True,
+                column_config={
+                    "Probability": st.column_config.NumberColumn("Probability", format="%.2f%%")
+                }
+            )  
+            st.markdown(f"Condition most likely being described is **{response}**.")
+            st.link_button(label=f"View {model_name} report", url=selected_page, icon="📊", type="secondary")
         else:
-            if model_name in ("Multinomial Naive Bayes", "Logistic Regression", "Support Vector Machine"):
-                st.markdown(f"**My predictions made with {model_name}:**")
-                top_pred = get_top_n_predictions(model, prompt)
-                df = pd.DataFrame(top_pred, columns=["Drug name", "Probability"])
-                df["Probability"] = df["Probability"]*100
-                st.dataframe(df,
-                             hide_index=True,
-                             column_config={
-                                    "Probability": st.column_config.NumberColumn(
-                                        "Probability",
-                                        format="%.2f%%"
-                                    )
-                                }
-                             )  
-                st.markdown(f"Drug most likely to be used is **{response}**.")
-                st.link_button(label=f"View {model_name} report", url=selected_page, icon="📊", type="secondary")
+            st.markdown(f"**My predictions made with {model_name}:**")
+            top_pred = get_top_n_predictions(model, prompt)
+            df = pd.DataFrame(top_pred, columns=["Drug name", "Probability"])
+            df["Probability"] = df["Probability"]*100
+            st.dataframe(df,
+                hide_index=True,
+                column_config={
+                    "Probability": st.column_config.NumberColumn("Probability", format="%.2f%%")
+                }
+            )  
+            st.markdown(f"Drug most likely to be used is **{response}**.")
+            st.link_button(label=f"View {model_name} report", url=selected_page, icon="📊", type="secondary")
